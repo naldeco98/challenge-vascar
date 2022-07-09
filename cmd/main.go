@@ -5,8 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	hanlder "github.com/naldeco98/challenge-vascar/cmd/handler"
-	"github.com/naldeco98/challenge-vascar/internal/reports"
-	"github.com/naldeco98/challenge-vascar/pkg/database"
+	"github.com/naldeco98/challenge-vascar/internal/repository"
+	"github.com/naldeco98/challenge-vascar/internal/service"
+	"github.com/naldeco98/challenge-vascar/pkg/storage"
 )
 
 const FILE = "testing.db"
@@ -20,20 +21,23 @@ func main() {
 		}
 	}()
 
-	db, err := database.GetDatabaseConnection("testing.db")
-	
+	db, err := storage.GetDatabaseConnection("testing.db")
+
 	if err != nil {
 		panic(err)
 	}
 
 	r := gin.Default()
 
-	repo := reports.NewRepostiroy(db)
-	service := reports.NewService(repo)
+	repo := repository.NewRepostiroy(db)
+	service := service.NewService(repo)
 	handle := hanlder.NewHanlder(service)
 
-	r.POST("comments/report", handle.ReportMessage())
-	r.POST("posts/report", handle.ReportPost())
+	reports := r.Group("/reports")
+	{
+		reports.POST("comments", handle.ReportComment())
+		reports.POST("posts", handle.ReportPost())
+	}
 
 	if err := r.Run(); err != nil {
 		panic(err)

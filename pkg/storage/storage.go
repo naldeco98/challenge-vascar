@@ -1,7 +1,8 @@
-package database
+package storage
 
 import (
 	"database/sql"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -11,7 +12,8 @@ func GetDatabaseConnection(pathFile string) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := db.Ping(); err != nil {
+	// Check if database exist in pathFile
+	if _, err := os.Stat(pathFile); err != nil {
 		return nil, err
 	}
 	return db, nil
