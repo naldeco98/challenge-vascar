@@ -40,7 +40,7 @@ func (r *repository) CreateCommentReport(ctx context.Context, report *domain.Rep
 }
 
 func (r *repository) CreatePostReport(ctx context.Context, report *domain.ReportPost) (int, error) {
-	stmt, err := r.db.Prepare("INSERT INTO report_post (reason, user_id, comment_id) VALUES (?, ?, ?)")
+	stmt, err := r.db.Prepare("INSERT INTO report_posts (reason, user_id, post_id) VALUES (?, ?, ?)")
 	if err != nil {
 		return 0, err
 	}
@@ -71,6 +71,14 @@ func (r *repository) GetCommentById(ctx context.Context, id int) (domain.Comment
 }
 
 func (r *repository) GetPostById(ctx context.Context, id int) (domain.Post, error) {
-
-	return domain.Post{}, nil
+	stmt, err := r.db.Prepare("SELECT id, text, creation_date FROM posts WHERE id = ?")
+	if err != nil {
+		return domain.Post{}, err
+	}
+	defer stmt.Close()
+	var result domain.Post
+	if err := stmt.QueryRow(id).Scan(&result.Id, &result.Text, &result.Created); err != nil {
+		return domain.Post{}, err
+	}
+	return result, nil
 }
