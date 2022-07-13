@@ -26,9 +26,7 @@ func (h *Hanlder) ReportComment() gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
 		var req request
-		if err := validate(ctx, &req); err != nil {
-			return
-		}
+
 		// if err := ctx.BindJSON(&req); err != nil {
 		// 	ctx.JSON(400, gin.H{"error": err.Error()})
 		// 	return
@@ -58,13 +56,4 @@ func (h *Hanlder) ReportPost() gin.HandlerFunc {
 		}
 		ctx.String(201, "report_created")
 	}
-}
-
-func validate(ctx *gin.Context, req interface{}) error {
-	if err := ctx.ShouldBindJSON(req); err != nil {
-		ctx.JSON(400, gin.H{"error": err.Error()})
-		return err
-	}
-	// TODO Validate fields
-	return nil
 }
