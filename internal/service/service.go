@@ -17,7 +17,7 @@ type service struct {
 	r repository.Reports
 }
 
-func NewService(r repository.Reports) Reports {
+func NewReportService(r repository.Reports) Reports {
 	return &service{r: r}
 }
 

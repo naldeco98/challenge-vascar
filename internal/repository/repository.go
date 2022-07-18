@@ -18,7 +18,7 @@ type repository struct {
 	db *sql.DB
 }
 
-func NewRepostiroy(database *sql.DB) Reports {
+func NewReportRepository(database *sql.DB) Reports {
 	return &repository{db: database}
 }
 
