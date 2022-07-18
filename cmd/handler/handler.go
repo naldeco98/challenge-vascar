@@ -11,6 +11,18 @@ import (
 	"github.com/naldeco98/challenge-vascar/internal/service"
 )
 
+type reportComment struct {
+	Reason    string `json:"reason" binding:"required"`
+	UserId    int    `json:"user_id" binding:"required"`
+	CommentId int    `json:"comment_id" binding:"required"`
+}
+
+type reportPost struct {
+	Reason string `json:"reason" binding:"required"`
+	UserId int    `json:"user_id" binding:"required"`
+	PostId int    `json:"post_id" binding:"required"`
+}
+
 type Handler struct {
 	service service.Reports
 }
@@ -19,16 +31,22 @@ func NewHandler(service service.Reports) *Handler {
 	return &Handler{service: service}
 }
 
+// ReportComment godoc
+// @Summary      Create a report for a comment
+// @Tags         comments
+// @Accept       json
+// @Produce      json
+// @Param data body reportComment true "report a comment"
+// @Success      200  {object} string
+// @Failure      400  {object} string
+// @Failure      404  {object} string
+// @Failure      422  {object} string
+// @Failure      500  {object} string
+// @Router       /reports/comments [post]
 func (h *Handler) ReportComment() gin.HandlerFunc {
 
-	type request struct {
-		Reason    string `json:"reason" binding:"required"`
-		UserId    int    `json:"user_id" binding:"required"`
-		CommentId int    `json:"comment_id" binding:"required"`
-	}
-
 	return func(ctx *gin.Context) {
-		var req request
+		var req reportComment
 		if err := ctx.ShouldBindJSON(&req); err != nil {
 			var verr validator.ValidationErrors
 			if errors.As(err, &verr) {
@@ -69,16 +87,22 @@ func (h *Handler) ReportComment() gin.HandlerFunc {
 	}
 }
 
+// ReportPost godoc
+// @Summary      Create a report for a post
+// @Tags         posts
+// @Accept       json
+// @Produce      json
+// @Param data body reportPost true "report a post"
+// @Success      200  {object} string
+// @Failure      400  {object} string
+// @Failure      404  {object} string
+// @Failure      422  {object} string
+// @Failure      500  {object} string
+// @Router       /reports/posts [post]
 func (h *Handler) ReportPost() gin.HandlerFunc {
 
-	type request struct {
-		Reason string `json:"reason" binding:"required"`
-		UserId int    `json:"user_id" binding:"required"`
-		PostId int    `json:"post_id" binding:"required"`
-	}
-
 	return func(ctx *gin.Context) {
-		var req request
+		var req reportPost
 		if err := ctx.ShouldBindJSON(&req); err != nil {
 			var verr validator.ValidationErrors
 			if errors.As(err, &verr) {
