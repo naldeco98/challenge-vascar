@@ -19,7 +19,7 @@ func main() {
 		}
 	}()
 
-	db, err := storage.GetDatabaseConnection("/home/naldeco/github/challenge-vascar/my_database.db")
+	db, err := storage.GetDatabaseConnection("my_database.db")
 
 	if err != nil {
 		panic(err)
