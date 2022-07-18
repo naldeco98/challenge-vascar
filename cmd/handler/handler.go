@@ -1,21 +1,25 @@
-package hanlder
+package handler
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/naldeco98/challenge-vascar/internal/service"
 )
 
-type Hanlder struct {
+type Handler struct {
 	service service.Reports
 }
 
-func NewHanlder(service service.Reports) *Hanlder {
-	return &Hanlder{service: service}
+func NewHandler(service service.Reports) *Handler {
+	return &Handler{service: service}
 }
 
-func (h *Hanlder) ReportComment() gin.HandlerFunc {
+func (h *Handler) ReportComment() gin.HandlerFunc {
 
 	type request struct {
 		Reason    string `json:"reason" binding:"required"`
@@ -26,7 +30,20 @@ func (h *Hanlder) ReportComment() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req request
 		if err := ctx.ShouldBindJSON(&req); err != nil {
-			ctx.String(400, err.Error())
+			var verr validator.ValidationErrors
+			if errors.As(err, &verr) {
+				for _, f := range verr {
+					ctx.String(400, f.Field()+" is "+f.Tag())
+					return
+				}
+			}
+			switch err.(type) {
+			case *json.UnmarshalTypeError:
+				sliced := strings.Split(err.Error(), " ")
+				ctx.String(422, sliced[8]+" is '"+sliced[11]+"' but got '"+sliced[3]+"'")
+				return
+			}
+			ctx.String(422, "wrong request body")
 			return
 		}
 
@@ -52,7 +69,7 @@ func (h *Hanlder) ReportComment() gin.HandlerFunc {
 	}
 }
 
-func (h *Hanlder) ReportPost() gin.HandlerFunc {
+func (h *Handler) ReportPost() gin.HandlerFunc {
 
 	type request struct {
 		Reason string `json:"reason" binding:"required"`
@@ -62,8 +79,21 @@ func (h *Hanlder) ReportPost() gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
 		var req request
-		if err := ctx.BindJSON(&req); err != nil {
-			ctx.String(400, err.Error())
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			var verr validator.ValidationErrors
+			if errors.As(err, &verr) {
+				for _, f := range verr {
+					ctx.String(400, f.Field()+" is "+f.Tag())
+					return
+				}
+			}
+			switch err.(type) {
+			case *json.UnmarshalTypeError:
+				sliced := strings.Split(err.Error(), " ")
+				ctx.String(422, sliced[8]+" is '"+sliced[11]+"' but got '"+sliced[3]+"'")
+				return
+			}
+			ctx.String(422, "wrong request body")
 			return
 		}
 
@@ -72,7 +102,7 @@ func (h *Hanlder) ReportPost() gin.HandlerFunc {
 			ctx.String(400, "user_id cant be negative")
 			return
 		case req.PostId < 0:
-			ctx.String(400, "comment_id cant be negative")
+			ctx.String(400, "post_id cant be negative")
 			return
 		case req.Reason == "":
 			ctx.String(400, "the reason cant be empty")
